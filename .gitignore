@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual env
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+
+# Builds / binaries
+dist/
+build/
+*.exe
+
+# Environment & secrets
+.env
+*.env.local
+
+# Local data
+history.json
+
+# OS junk
+.DS_Store
+Thumbs.db
