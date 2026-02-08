@@ -73,10 +73,14 @@ class OpenAIService:
         logger.info(f"  Превью: {text[:100]}...")
         logger.info(f"  Модель: {self.model}")
         
-        system_prompt = """Ты — эксперт по конкурентному анализу. Проанализируй предоставленный текст конкурента и верни структурированный JSON-ответ.
+        system_prompt = """Ты — эксперт по конкурентному анализу и маркетингу. Проанализируй предоставленный текст конкурента и верни структурированный JSON-ответ.
+
+Оцени текст по модели AIDA (Attention — привлечение внимания, Interest — интерес, Desire — желание, Action — призыв к действию). Дай общую оценку 0-10 и краткий анализ.
 
 Формат ответа (строго JSON):
 {
+    "aida_score": 7,
+    "aida_analysis": "Краткий анализ: насколько текст соответствует AIDA: внимание (заголовок), интерес (детали), желание (выгоды), действие (CTA)",
     "strengths": ["сильная сторона 1", "сильная сторона 2", ...],
     "weaknesses": ["слабая сторона 1", "слабая сторона 2", ...],
     "unique_offers": ["уникальное предложение 1", "уникальное предложение 2", ...],
@@ -85,6 +89,7 @@ class OpenAIService:
 }
 
 Важно:
+- aida_score: число от 0 до 10
 - Каждый массив должен содержать 3-5 пунктов
 - Пиши на русском языке
 - Будь конкретен и практичен в рекомендациях"""
@@ -113,6 +118,8 @@ class OpenAIService:
             data = self._parse_json_response(content)
             
             result = CompetitorAnalysis(
+                aida_score=data.get("aida_score", 0),
+                aida_analysis=data.get("aida_analysis", ""),
                 strengths=data.get("strengths", []),
                 weaknesses=data.get("weaknesses", []),
                 unique_offers=data.get("unique_offers", []),
@@ -120,7 +127,7 @@ class OpenAIService:
                 summary=data.get("summary", "")
             )
             
-            logger.info(f"  Результат: {len(result.strengths)} сильных, {len(result.weaknesses)} слабых сторон")
+            logger.info(f"  Результат: AIDA={result.aida_score}/10, {len(result.strengths)} сильных, {len(result.weaknesses)} слабых сторон")
             logger.info("=" * 50)
             
             return result
@@ -147,11 +154,15 @@ class OpenAIService:
     "marketing_insights": ["инсайт 1", "инсайт 2", ...],
     "visual_style_score": 7,
     "visual_style_analysis": "Анализ визуального стиля конкурента",
+    "animation_potential": 6,
+    "animation_potential_analysis": "Краткое пояснение: какие элементы подходят для анимации и почему (не более 3 предложений)",
     "recommendations": ["рекомендация 1", "рекомендация 2", ...]
 }
 
 Важно:
-- visual_style_score от 0 до 10
+- visual_style_score от 0 до 10 — оценка визуального стиля
+- animation_potential от 0 до 10 — потенциал изображения для анимации (насколько легко/эффектно можно анимировать элементы, есть ли динамика, движение глаз, возможности для motion design)
+- animation_potential_analysis — пояснение оценки потенциала анимации, не более 3 предложений
 - Каждый массив должен содержать 3-5 пунктов
 - Пиши на русском языке
 - Оценивай: цветовую палитру, типографику, композицию, UX/UI элементы"""
@@ -197,10 +208,12 @@ class OpenAIService:
                 marketing_insights=data.get("marketing_insights", []),
                 visual_style_score=data.get("visual_style_score", 5),
                 visual_style_analysis=data.get("visual_style_analysis", ""),
+                animation_potential=data.get("animation_potential", 5),
+                animation_potential_analysis=data.get("animation_potential_analysis", ""),
                 recommendations=data.get("recommendations", [])
             )
             
-            logger.info(f"  Результат: оценка стиля {result.visual_style_score}/10")
+            logger.info(f"  Результат: стиль {result.visual_style_score}/10, анимация {result.animation_potential}/10")
             logger.info(f"  Инсайтов: {len(result.marketing_insights)}, рекомендаций: {len(result.recommendations)}")
             logger.info("=" * 50)
             
@@ -273,8 +286,12 @@ class OpenAIService:
         
         system_prompt = """Ты — эксперт по конкурентному анализу и UX/UI дизайну. Проанализируй скриншот сайта конкурента и верни структурированный JSON-ответ.
 
+Оцени контент страницы по модели AIDA (Attention — привлечение внимания, Interest — интерес, Desire — желание, Action — призыв к действию). Дай общую оценку 0-10 и краткий анализ.
+
 Формат ответа (строго JSON):
 {
+    "aida_score": 7,
+    "aida_analysis": "Краткий анализ: насколько страница соответствует AIDA",
     "strengths": ["сильная сторона 1", "сильная сторона 2", ...],
     "weaknesses": ["слабая сторона 1", "слабая сторона 2", ...],
     "unique_offers": ["уникальное предложение/фича 1", "уникальное предложение/фича 2", ...],
@@ -333,6 +350,8 @@ class OpenAIService:
             data = self._parse_json_response(content)
             
             result = CompetitorAnalysis(
+                aida_score=data.get("aida_score", 0),
+                aida_analysis=data.get("aida_analysis", ""),
                 strengths=data.get("strengths", []),
                 weaknesses=data.get("weaknesses", []),
                 unique_offers=data.get("unique_offers", []),
@@ -341,6 +360,7 @@ class OpenAIService:
             )
             
             logger.info(f"  Результат:")
+            logger.info(f"    - AIDA: {result.aida_score}/10")
             logger.info(f"    - Сильных сторон: {len(result.strengths)}")
             logger.info(f"    - Слабых сторон: {len(result.weaknesses)}")
             logger.info(f"    - УТП: {len(result.unique_offers)}")

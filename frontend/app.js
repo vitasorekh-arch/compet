@@ -147,7 +147,27 @@ const ui = {
     },
     
     renderTextAnalysis(analysis) {
+        const aidaScore = analysis.aida_score ?? 0;
+        const aidaPercent = (aidaScore / 10) * 100;
+        
         return `
+            ${(analysis.aida_score !== undefined && analysis.aida_score !== null) ? `
+            <div class="result-block">
+                <h3>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                    Оценка по AIDA
+                </h3>
+                <div class="score-display">
+                    <span class="score-value">${aidaScore}/10</span>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: ${aidaPercent}%"></div>
+                    </div>
+                </div>
+                ${analysis.aida_analysis ? `<p>${analysis.aida_analysis}</p>` : ''}
+            </div>
+            ` : ''}
             ${this.renderResultBlock('Сильные стороны', analysis.strengths, 'strengths')}
             ${this.renderResultBlock('Слабые стороны', analysis.weaknesses, 'weaknesses')}
             ${this.renderResultBlock('Уникальные предложения', analysis.unique_offers, 'unique')}
@@ -168,7 +188,8 @@ const ui = {
     },
     
     renderImageAnalysis(analysis) {
-        const scorePercent = (analysis.visual_style_score / 10) * 100;
+        const stylePercent = (analysis.visual_style_score / 10) * 100;
+        const animPercent = ((analysis.animation_potential ?? 0) / 10) * 100;
         
         return `
             <div class="result-block">
@@ -193,11 +214,29 @@ const ui = {
                 <div class="score-display">
                     <span class="score-value">${analysis.visual_style_score}/10</span>
                     <div class="score-bar">
-                        <div class="score-fill" style="width: ${scorePercent}%"></div>
+                        <div class="score-fill" style="width: ${stylePercent}%"></div>
                     </div>
                 </div>
                 <p>${analysis.visual_style_analysis}</p>
             </div>
+            
+            ${(analysis.animation_potential !== undefined && analysis.animation_potential !== null) ? `
+            <div class="result-block">
+                <h3>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                    </svg>
+                    Потенциал анимации
+                </h3>
+                <div class="score-display">
+                    <span class="score-value">${analysis.animation_potential}/10</span>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: ${animPercent}%"></div>
+                    </div>
+                </div>
+                ${analysis.animation_potential_analysis ? `<p>${analysis.animation_potential_analysis}</p>` : ''}
+            </div>
+            ` : ''}
             
             ${this.renderResultBlock('Маркетинговые инсайты', analysis.marketing_insights, 'insights')}
             ${this.renderResultBlock('Рекомендации', analysis.recommendations, 'recommendations')}

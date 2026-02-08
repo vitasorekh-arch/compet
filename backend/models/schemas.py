@@ -22,6 +22,8 @@ class ParseDemoRequest(BaseModel):
 
 class CompetitorAnalysis(BaseModel):
     """Структурированный анализ конкурента"""
+    aida_score: int = Field(0, ge=0, le=10, description="Оценка по модели AIDA (0-10)")
+    aida_analysis: str = Field("", description="Анализ по AIDA: внимание, интерес, желание, призыв к действию")
     strengths: List[str] = Field(default_factory=list, description="Сильные стороны")
     weaknesses: List[str] = Field(default_factory=list, description="Слабые стороны")
     unique_offers: List[str] = Field(default_factory=list, description="Уникальные предложения")
@@ -35,6 +37,8 @@ class ImageAnalysis(BaseModel):
     marketing_insights: List[str] = Field(default_factory=list, description="Маркетинговые инсайты")
     visual_style_score: int = Field(0, ge=0, le=10, description="Оценка визуального стиля (0-10)")
     visual_style_analysis: str = Field("", description="Анализ визуального стиля")
+    animation_potential: int = Field(0, ge=0, le=10, description="Потенциал анимации (0-10)")
+    animation_potential_analysis: str = Field("", description="Пояснение потенциала анимации (не более 3 предложений)")
     recommendations: List[str] = Field(default_factory=list, description="Рекомендации")
 
 

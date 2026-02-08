@@ -495,6 +495,29 @@ class MainWindow(QMainWindow):
         self.results_layout.addWidget(title)
         
         if result_type == "text" or result_type == "parse":
+            # Оценка по AIDA
+            if "aida_score" in analysis:
+                score = analysis.get("aida_score", 0)
+                aida_frame = QFrame()
+                aida_frame.setObjectName("resultBlock")
+                aida_layout = QVBoxLayout(aida_frame)
+                
+                aida_title = QLabel("📊 Оценка по AIDA")
+                aida_title.setObjectName("sectionTitle")
+                
+                aida_value = QLabel(f"{score}/10")
+                aida_value.setStyleSheet("font-size: 32px; font-weight: bold; color: #22d3ee;")
+                
+                aida_layout.addWidget(aida_title)
+                aida_layout.addWidget(aida_value)
+                if analysis.get("aida_analysis"):
+                    aida_desc = QLabel(analysis["aida_analysis"])
+                    aida_desc.setWordWrap(True)
+                    aida_desc.setStyleSheet("color: #94a3b8;")
+                    aida_layout.addWidget(aida_desc)
+                
+                self.results_layout.addWidget(aida_frame)
+            
             # Сильные стороны
             if analysis.get("strengths"):
                 block = ResultBlock("✅ Сильные стороны", analysis["strengths"])
@@ -573,6 +596,29 @@ class MainWindow(QMainWindow):
                 score_layout.addWidget(score_title)
                 score_layout.addWidget(score_value)
                 self.results_layout.addWidget(score_frame)
+            
+            # Потенциал анимации
+            if "animation_potential" in analysis:
+                anim_score = analysis["animation_potential"]
+                anim_frame = QFrame()
+                anim_frame.setObjectName("resultBlock")
+                anim_layout = QVBoxLayout(anim_frame)
+                
+                anim_title = QLabel("⚡ Потенциал анимации")
+                anim_title.setObjectName("sectionTitle")
+                
+                anim_value = QLabel(f"{anim_score}/10")
+                anim_value.setStyleSheet("font-size: 32px; font-weight: bold; color: #22d3ee;")
+                
+                anim_layout.addWidget(anim_title)
+                anim_layout.addWidget(anim_value)
+                if analysis.get("animation_potential_analysis"):
+                    anim_desc = QLabel(analysis["animation_potential_analysis"])
+                    anim_desc.setWordWrap(True)
+                    anim_desc.setStyleSheet("color: #94a3b8;")
+                    anim_layout.addWidget(anim_desc)
+                
+                self.results_layout.addWidget(anim_frame)
             
             # Маркетинговые инсайты
             if analysis.get("marketing_insights"):
