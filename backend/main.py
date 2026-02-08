@@ -335,6 +335,12 @@ async def clear_history():
     return {"success": True, "message": "История очищена"}
 
 
+@app.get("/competitor_urls")
+async def get_competitor_urls():
+    """Получить список URL конкурентов из конфигурации"""
+    return {"urls": settings.competitor_urls}
+
+
 @app.get("/health")
 async def health_check():
     """Проверка работоспособности сервиса"""

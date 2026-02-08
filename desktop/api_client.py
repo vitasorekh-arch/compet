@@ -71,6 +71,14 @@ class APIClient:
             json={"url": url}
         )
     
+    def get_competitor_urls(self) -> list:
+        """Получить список URL конкурентов из конфигурации"""
+        try:
+            data = self._request("GET", "/competitor_urls")
+            return data.get("urls", [])
+        except Exception:
+            return []
+    
     def get_history(self) -> Dict[str, Any]:
         """Получить историю запросов"""
         return self._request("GET", "/history")

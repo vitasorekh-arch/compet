@@ -32,6 +32,9 @@ const elements = {
     urlInput: document.getElementById('url-input'),
     parseBtn: document.getElementById('parse-btn'),
     
+    // Competitor URLs
+    competitorNavContainer: document.getElementById('competitor-nav-container'),
+    
     // History
     historyList: document.getElementById('history-list'),
     clearHistoryBtn: document.getElementById('clear-history-btn'),
@@ -78,6 +81,12 @@ const api = {
         return response.json();
     },
     
+    async getCompetitorUrls() {
+        const response = await fetch(`${this.baseUrl}/competitor_urls`);
+        const data = await response.json();
+        return data.urls || [];
+    },
+    
     async getHistory() {
         const response = await fetch(`${this.baseUrl}/history`);
         return response.json();
@@ -106,8 +115,11 @@ const ui = {
     showTab(tabId) {
         state.currentTab = tabId;
         
-        // Update navigation
+        // Update navigation (including competitor buttons)
         elements.navButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tabId);
+        });
+        document.querySelectorAll('.nav-btn-competitor').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.tab === tabId);
         });
         
@@ -469,8 +481,8 @@ const handlers = {
     },
     
     // Parse demo
-    async handleParse() {
-        let url = elements.urlInput.value.trim();
+    async handleParse(urlOverride) {
+        let url = urlOverride || elements.urlInput.value.trim();
         
         if (!url) {
             ui.showError('Введите URL сайта для парсинга');
@@ -500,6 +512,12 @@ const handlers = {
         }
     },
     
+    async handleCompetitorClick(url) {
+        ui.showTab('parse');
+        elements.urlInput.value = url.replace(/^https?:\/\//, '');
+        await handlers.handleParse.call(handlers, url);
+    },
+    
     // History
     async handleClearHistory() {
         if (!confirm('Вы уверены, что хотите очистить историю?')) {
@@ -520,7 +538,45 @@ const handlers = {
     }
 };
 
+// === Helpers ===
+function getDomainFromUrl(url) {
+    try {
+        const u = new URL(url.startsWith('http') ? url : 'https://' + url);
+        return u.hostname.replace(/^www\./, '');
+    } catch {
+        return url;
+    }
+}
+
 // === Initialize ===
+async function loadCompetitorUrls() {
+    if (!elements.competitorNavContainer) return;
+    try {
+        const urls = await api.getCompetitorUrls();
+        elements.competitorNavContainer.innerHTML = '';
+        urls.forEach((url, i) => {
+            const domain = getDomainFromUrl(url);
+            const btn = document.createElement('button');
+            btn.className = 'nav-btn nav-btn-competitor';
+            btn.dataset.tab = `competitor-${i}`;
+            btn.dataset.url = url;
+            btn.title = url;
+            btn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="2" y1="12" x2="22" y2="12"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+                <span>${domain}</span>
+            `;
+            btn.addEventListener('click', () => handlers.handleCompetitorClick.call(handlers, url));
+            elements.competitorNavContainer.appendChild(btn);
+        });
+    } catch (e) {
+        console.debug('Could not load competitor URLs:', e);
+    }
+}
+
 function init() {
     // Navigation
     elements.navButtons.forEach(btn => {
@@ -540,9 +596,9 @@ function init() {
     elements.analyzeImageBtn.addEventListener('click', handlers.handleAnalyzeImage.bind(handlers));
     
     // Parse demo
-    elements.parseBtn.addEventListener('click', handlers.handleParse.bind(handlers));
+    elements.parseBtn.addEventListener('click', () => handlers.handleParse.call(handlers));
     elements.urlInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handlers.handleParse.call(handlers);
+        if (e.key === 'Enter') handlers.handleParse.call(handlers, null);
     });
     
     // History
@@ -553,6 +609,9 @@ function init() {
     
     // Show default tab
     ui.showTab('text');
+    
+    // Load competitor URLs for sidebar
+    loadCompetitorUrls();
 }
 
 // Start app

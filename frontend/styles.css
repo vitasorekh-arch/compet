@@ -167,6 +167,22 @@ body::before {
     color: var(--text-primary);
 }
 
+.competitor-nav-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav-btn-competitor {
+    font-size: 0.9em;
+}
+
+.nav-btn-competitor span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .nav-btn.active {
     background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(6, 182, 212, 0.1));
     color: var(--accent-secondary);
@@ -618,6 +634,58 @@ input[type="text"]::placeholder {
     color: var(--text-secondary);
     margin-bottom: 8px;
     padding-left: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) var(--bg-secondary);
+}
+
+.parsed-content .value::-webkit-scrollbar {
+    height: 6px;
+}
+
+.parsed-content .value::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 3px;
+}
+
+.parsed-content .value::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 3px;
+}
+
+.parsed-content .value::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-primary);
+}
+
+/* Горизонтальный скролл для блоков анализа сайта */
+.result-block ul,
+.result-block p {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.result-block ul::-webkit-scrollbar,
+.result-block p::-webkit-scrollbar {
+    height: 6px;
+}
+
+.result-block ul::-webkit-scrollbar-track,
+.result-block p::-webkit-scrollbar-track {
+    background: var(--bg-input);
+    border-radius: 3px;
+}
+
+.result-block ul::-webkit-scrollbar-thumb,
+.result-block p::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 3px;
+}
+
+.result-block ul::-webkit-scrollbar-thumb:hover,
+.result-block p::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-primary);
 }
 
 /* === History === */

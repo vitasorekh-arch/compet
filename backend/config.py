@@ -4,7 +4,9 @@
 import os
 import logging
 import sys
+from typing import List
 from pydantic_settings import BaseSettings
+from pydantic import Field, computed_field
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -60,9 +62,20 @@ class Settings(BaseSettings):
     parser_timeout: int = 10
     parser_user_agent: str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     
+    # URL сайтов конкурентов (через env: COMPETITOR_URLS=url1,url2,url3)
+    # Строка — pydantic не парсит как JSON; список — computed_field
+    competitor_urls_str: str = Field(default="", validation_alias="COMPETITOR_URLS")
+    
+    @computed_field
+    @property
+    def competitor_urls(self) -> List[str]:
+        raw = self.competitor_urls_str or ""
+        return [u.strip() for u in raw.split(",") if u and u.strip()]
+    
     class Config:
         env_file = ".env"
         extra = "ignore"
+        populate_by_name = True
 
 
 settings = Settings()

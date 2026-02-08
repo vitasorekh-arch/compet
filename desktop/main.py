@@ -213,6 +213,19 @@ class MainWindow(QMainWindow):
         
         self.nav_buttons[0].setChecked(True)
         
+        # Кнопки быстрого доступа к конкурентам из config
+        competitor_urls = api_client.get_competitor_urls()
+        for url in competitor_urls:
+            domain = url.replace("https://", "").replace("http://", "").split("/")[0]
+            if domain.startswith("www."):
+                domain = domain[4:]
+            btn = QPushButton(f"🌐 {domain[:25]}{'…' if len(domain) > 25 else ''}")
+            btn.setObjectName("navButton")
+            btn.setToolTip(url)
+            btn.setStyleSheet("font-size: 13px;")
+            btn.clicked.connect(lambda checked, u=url: self.parse_competitor(u))
+            nav_layout.addWidget(btn)
+        
         nav_layout.addStretch()
         
         # Status
@@ -258,6 +271,8 @@ class MainWindow(QMainWindow):
         # Results area
         self.results_scroll = QScrollArea()
         self.results_scroll.setWidgetResizable(True)
+        self.results_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.results_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.results_scroll.hide()
         
         self.results_widget = QWidget()
@@ -438,6 +453,13 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.history_scroll)
         
         return widget
+    
+    def parse_competitor(self, url: str):
+        """Быстрый анализ сайта конкурента из конфига"""
+        self.switch_tab(2)
+        domain = url.replace("https://", "").replace("http://", "").split("/")[0]
+        self.url_input.setText(domain)
+        self.parse_site(url)
     
     def switch_tab(self, index: int):
         """Переключение вкладок"""
@@ -685,9 +707,9 @@ class MainWindow(QMainWindow):
         else:
             self.show_error(result.get("error", "Неизвестная ошибка"))
     
-    def parse_site(self):
+    def parse_site(self, url_override: str = None):
         """Парсинг сайта"""
-        url = self.url_input.text().strip()
+        url = url_override or self.url_input.text().strip()
         
         if not url:
             self.show_error("Введите URL сайта")
@@ -695,7 +717,8 @@ class MainWindow(QMainWindow):
         
         self.show_loading("Загружаю и анализирую сайт...")
         
-        self.current_worker = WorkerThread(api_client.parse_demo, url)
+        full_url = url if url.startswith("http") else "https://" + url
+        self.current_worker = WorkerThread(api_client.parse_demo, full_url)
         self.current_worker.finished.connect(self.on_parse_complete)
         self.current_worker.error.connect(lambda e: self.on_error(e))
         self.current_worker.start()
